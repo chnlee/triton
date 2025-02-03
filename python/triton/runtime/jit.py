@@ -570,7 +570,6 @@ class JITFunction(KernelInterface[T]):
             if (newVal := globals_dict.get(name, not_present)) != val:
                 raise RuntimeError(
                     f"Global variable {name} has changed since we compiled this kernel, from {val} to {newVal}")
-
         if not warmup:
             # canonicalize grid
             assert grid is not None

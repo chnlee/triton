@@ -1341,6 +1341,7 @@ def program_id(axis, _builder=None):
     #     npg0 = num_programs(0, _builder)
     #     npg1 = num_programs(1, _builder)
     #     return pid0 + pid1*npg0 + pid2*npg0*npg1
+    import ipdb; ipdb.set_trace()
     axis = _constexpr_to_value(axis)
     return semantic.program_id(axis, _builder)
 
