@@ -314,9 +314,9 @@ def matmul(a, b, activation=""):
     # Allocates output.
     c = torch.empty((M, N), device=a.device, dtype=torch.float16)
     # 1D launch kernel where each block gets its own program.
-    import ipdb; ipdb.set_trace()
+    # import ipdb; ipdb.set_trace()
     grid = lambda META: (triton.cdiv(M, META['BLOCK_SIZE_M']) * triton.cdiv(N, META['BLOCK_SIZE_N']), )
-    import ipdb; ipdb.set_trace()
+    # import ipdb; ipdb.set_trace()
     matmul_kernel[grid](
         a, b, c,  #
         M, N, K,  #
