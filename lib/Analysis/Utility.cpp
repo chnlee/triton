@@ -66,7 +66,7 @@ SmallVector<unsigned> ReduceOpHelper::getOrderWithAxisAtBeginning() {
 unsigned ReduceOpHelper::getThreadOffsetOnReductionAxis() {
   auto srcLayout = getSrcLayout();
   auto *ctx = srcLayout.getContext();
-  auto linearLayout = *toLinearLayout(getSrcShape(), srcLayout);
+  auto linearLayout = toLinearLayout(getSrcShape(), srcLayout);
   auto axis = getAxis();
   auto kLane = mlir::StringAttr::get(ctx, "lane");
   const auto &bases = linearLayout.getBases();
@@ -158,7 +158,7 @@ unsigned ReduceOpHelper::getThreadsReductionAxis() {
   auto axis = getAxis();
   auto *ctx = getSrcLayout().getContext();
   auto ll = LinearEncodingAttr::get(
-      ctx, *toLinearLayout(getSrcShape(), getSrcLayout()));
+      ctx, toLinearLayout(getSrcShape(), getSrcLayout()));
   return ll.getThreadsPerWarp()[axis] * ll.getWarpsPerCTA()[axis];
 }
 
@@ -290,7 +290,7 @@ unsigned ScanLoweringHelper::getNonAxisNumBlocks() {
 bool ScanLoweringHelper::isSupported() {
   // TODO: Support the following cases:
   // 1. Scan on non-blocking encodings
-  if (!isa<BlockedEncodingAttr>(getEncoding()))
+  if (!isa<BlockedEncodingAttr>(srcEncoding))
     return false;
   return true;
 }
@@ -306,6 +306,10 @@ unsigned ScanLoweringHelper::getScratchSizeInElems() {
 }
 
 unsigned ScanLoweringHelper::getScratchSizeInBytes() {
+  // Lowering will fail later if the layout is not supported.
+  if (!isSupported())
+    return 0;
+
   unsigned axisNumWarps = getAxisNumWarpsWithUniqueData();
   if (axisNumWarps == 1)
     return 0;
@@ -320,8 +324,6 @@ std::optional<DecomposedWarpConversion>
 getWarpLayoutConvertDecomposition(RankedTensorType srcTy,
                                   RankedTensorType dstTy) {
   auto conversion = minimalCvtLayout(srcTy, dstTy);
-  if (!conversion)
-    return {};
 
   MLIRContext *ctx = srcTy.getContext();
   auto kRegister = StringAttr::get(ctx, "register");
@@ -329,8 +331,7 @@ getWarpLayoutConvertDecomposition(RankedTensorType srcTy,
 
   // We have already checked that data movement is only required within a warp,
   // thus we can discard the block and warp dimensions.
-  LinearLayout C =
-      conversion->sublayout({kLane, kRegister}, {kLane, kRegister});
+  LinearLayout C = conversion.sublayout({kLane, kRegister}, {kLane, kRegister});
 
   // `C` is map from `(dst_lane, dst_reg) -> (src_lane, src_reg)`. From the
   // perspetive of the destination lane, it tells us which register from which
@@ -641,15 +642,10 @@ bool GatherLoweringHelper::isWarpLocal() {
   // source and index tensors, all the elements are owned by the same warp.
   RankedTensorType srcType = gatherOp.getSrc().getType();
   RankedTensorType idxType = gatherOp.getIndices().getType();
-  std::optional<LinearLayout> srcLayout =
+  LinearLayout srcLayout =
       toLinearLayout(srcType.getShape(), srcType.getEncoding());
-  std::optional<LinearLayout> idxLayout =
+  LinearLayout idxLayout =
       toLinearLayout(idxType.getShape(), idxType.getEncoding());
-
-  // FIXME: If an unsupported layout was encountered, assume the gather is not
-  // warp-local.
-  if (!srcLayout || !idxLayout)
-    return false;
 
   Builder b(gatherOp.getContext());
   StringAttr kBlock = b.getStringAttr("block");
@@ -675,8 +671,8 @@ bool GatherLoweringHelper::isWarpLocal() {
   //
   // Which implies that changing the warp will not change the gather dimension.
   // And since there is no swizzling, this applies to all warps.
-  if (!srcLayout->sublayoutIsZero({kBlock, kWarp}, kGatherDim) ||
-      !idxLayout->sublayoutIsZero({kBlock, kWarp}, kGatherDim))
+  if (!srcLayout.sublayoutIsZero({kBlock, kWarp}, kGatherDim) ||
+      !idxLayout.sublayoutIsZero({kBlock, kWarp}, kGatherDim))
     return false;
 
   SmallVector<StringAttr> otherDims;
@@ -690,8 +686,8 @@ bool GatherLoweringHelper::isWarpLocal() {
   // mapping to all other dimensions must be the same for both layouts. If so,
   // then the warp that owns a particular index element also owns all the source
   // elements it could index into.
-  if (srcLayout->sublayout({kBlock, kWarp}, otherDims) !=
-      idxLayout->sublayout({kBlock, kWarp}, otherDims))
+  if (srcLayout.sublayout({kBlock, kWarp}, otherDims) !=
+      idxLayout.sublayout({kBlock, kWarp}, otherDims))
     return false;
 
   // The two constraints above ensure that data-movement to perform the gather
@@ -702,8 +698,8 @@ bool GatherLoweringHelper::isWarpLocal() {
   // in the index and source tensors are the same. This means we don't need to
   // xor shuffle across threads before emitting index shuffles; we push warp
   // shuffling to layout conversions.
-  return srcLayout->sublayout(kLane, otherDims) ==
-         idxLayout->sublayout(kLane, otherDims);
+  return srcLayout.sublayout(kLane, otherDims) ==
+         idxLayout.sublayout(kLane, otherDims);
 }
 
 unsigned getNumScratchElements(ArrayRef<unsigned> shape) {
@@ -718,6 +714,24 @@ bool supportMMA(triton::DotOp op, int version) {
   // https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#warp-level-matrix-fragment-mma-884-f16
   auto aElemTy = op.getA().getType().getElementType();
   auto bElemTy = op.getB().getType().getElementType();
+  if (version == 5) {
+    if (triton::tools::getBoolEnv("DISABLE_MMA_V5"))
+      return false;
+    auto retType = op.getType();
+    auto retShapePerCTA = getShapePerCTA(retType);
+    auto rank = retShapePerCTA.size();
+    auto mod = op->getParentOfType<ModuleOp>();
+    int numWarps = TritonGPUDialect::getNumWarps(mod);
+    if (aElemTy.isInteger() || bElemTy.isInteger() ||
+        retType.getElementType().isInteger())
+      return false;
+    if (op.getType().getRank() != 2)
+      return false;
+    if (!(numWarps % 4 == 0 && retShapePerCTA[rank - 2] % 64 == 0 &&
+          retShapePerCTA[rank - 1] % 8 == 0))
+      return false;
+    return true;
+  }
   if (version == 3) {
     if (triton::tools::getBoolEnv("DISABLE_MMA_V3"))
       return false;
@@ -736,14 +750,14 @@ bool supportMMA(triton::DotOp op, int version) {
       return false;
     if (!(numWarps % 4 == 0 && retShapePerCTA[rank - 2] % 64 == 0 &&
           retShapePerCTA[rank - 1] % 8 == 0 &&
-          (aElemTy.isFloat8E5M2() || aElemTy.isFloat8E4M3FN() ||
+          (llvm::isa<Float8E5M2Type, Float8E4M3FNType>(aElemTy) ||
            aElemTy.isInteger(8) || aElemTy.isF16() || aElemTy.isBF16() ||
            aElemTy.isF32()))) {
       return false;
     }
     // We cannot use MMA_V3 if we need to accumulate in F32 within the MMA op.
     if (op.getMaxNumImpreciseAcc() < 32 &&
-        (aElemTy.isFloat8E5M2() || aElemTy.isFloat8E4M3FN()) &&
+        (llvm::isa<Float8E5M2Type, Float8E4M3FNType>(aElemTy)) &&
         cast<RankedTensorType>(op.getType()).getElementType().isF32()) {
       return false;
     }
@@ -764,8 +778,8 @@ bool supportMMA(Value value, int version) {
       cast<triton::gpu::TensorOrMemDesc>(value.getType()).getElementType();
   // FP8 is not natively supported on all mma versions but it can always be
   // promoted to fp16 therefore we can always support it.
-  bool isFP8 = elemTy.isFloat8E5M2() || elemTy.isFloat8E4M3FN() ||
-               elemTy.isFloat8E5M2FNUZ() || elemTy.isFloat8E4M3FNUZ();
+  bool isFP8 = llvm::isa<Float8E5M2Type, Float8E4M3FNType, Float8E5M2FNUZType,
+                         Float8E4M3FNUZType>(elemTy);
   return isFP8 || elemTy.isF16() || elemTy.isBF16() ||
          (elemTy.isF32() && version >= 2) ||
          (elemTy.isInteger(8) && version >= 2);
@@ -884,21 +898,18 @@ bool matchMFMAAndDotOperandShuffleCase(RankedTensorType srcTy,
 // distributed shared memory. If it's also the identity on kWarp, we can
 // transfer via warp-shuffles, and if it's the identity on kLane just have to
 // reorder the registers
-std::optional<LinearLayout> minimalCvtLayout(RankedTensorType srcTy,
-                                             RankedTensorType dstTy) {
+LinearLayout minimalCvtLayout(RankedTensorType srcTy, RankedTensorType dstTy) {
   MLIRContext *ctx = srcTy.getContext();
-  std::optional<LinearLayout> srcLayout =
+  LinearLayout srcLayout =
       toLinearLayout(srcTy.getShape(), srcTy.getEncoding());
-  std::optional<LinearLayout> dstLayout =
+  LinearLayout dstLayout =
       toLinearLayout(dstTy.getShape(), dstTy.getEncoding());
-  if (!(srcLayout.has_value() && dstLayout.has_value()))
-    return std::nullopt;
   StringAttr kRegister = StringAttr::get(ctx, "register");
   StringAttr kLane = StringAttr::get(ctx, "lane");
   StringAttr kWarp = StringAttr::get(ctx, "warp");
   StringAttr kBlock = StringAttr::get(ctx, "block");
 
-  auto comp = dstLayout->invertAndCompose(*srcLayout);
+  auto comp = dstLayout.invertAndCompose(srcLayout);
   // We try to quotient by the largest subspace first
   auto dims = SmallVector<StringRef>{"block", "warp", "lane", "register"};
   for (auto dim : dims) {
@@ -914,24 +925,18 @@ std::optional<LinearLayout> minimalCvtLayout(RankedTensorType srcTy,
 bool cvtReordersRegisters(RankedTensorType srcTy, RankedTensorType dstTy) {
   auto layout = minimalCvtLayout(srcTy, dstTy);
   MLIRContext *ctx = srcTy.getContext();
-  if (!layout.has_value()) {
-    return false;
-  }
   auto kRegister = StringAttr::get(ctx, "register");
-  auto outDims = llvm::to_vector(layout->getOutDimNames());
+  auto outDims = to_vector(layout.getOutDimNames());
   return outDims.empty() || ArrayRef(outDims) == ArrayRef({kRegister});
 }
 
 bool cvtNeedsWarpShuffle(RankedTensorType srcTy, RankedTensorType dstTy) {
   auto layout = minimalCvtLayout(srcTy, dstTy);
   MLIRContext *ctx = srcTy.getContext();
-  if (!layout.has_value()) {
-    return false;
-  }
   auto kRegister = StringAttr::get(ctx, "register");
   auto kLane = StringAttr::get(ctx, "lane");
-  return llvm::to_vector(layout->getOutDimNames()) ==
-         llvm::SmallVector<StringAttr, 2>{kRegister, kLane};
+  return to_vector(layout.getOutDimNames()) ==
+         SmallVector<StringAttr, 2>{kRegister, kLane};
 }
 
 bool cvtNeedsSharedMemory(RankedTensorType srcTy, RankedTensorType dstTy) {
