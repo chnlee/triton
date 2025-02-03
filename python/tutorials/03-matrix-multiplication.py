@@ -155,7 +155,9 @@ import triton
 import triton.language as tl
 
 # DEVICE = triton.runtime.driver.active.get_active_torch_device()
+
 DEVICE = "cuda"
+
 
 def is_cuda():
     return triton.runtime.driver.active.get_current_target().backend == "cuda"
