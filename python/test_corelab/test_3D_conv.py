@@ -7,7 +7,7 @@ import torch
 import triton
 import triton.language as tl
 
-
+DEVICE = "cuda"
 @triton.jit
 def bmm_dot_kernel(
     k_size,
