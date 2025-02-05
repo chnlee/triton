@@ -1746,8 +1746,8 @@ void init_triton_ir(py::module &&m) {
              auto *context = self.getContext();
              bool haveDump = ::triton::tools::getBoolEnv("MLIR_ENABLE_DUMP");
              std::string funcToDump;
-             haveDiagnostics = true;
-             haveDump = true;
+            //  haveDiagnostics = true;
+            //  haveDump = true;
              if (!haveDump) {
                funcToDump = triton::tools::getStrEnv("MLIR_ENABLE_DUMP");
                if (!funcToDump.empty())
