@@ -153,6 +153,9 @@ import torch
 
 import triton
 import triton.language as tl
+from test_corelab.IRprinter import print_ir
+from test_corelab.IRprinter import run_TritonGPUToLLVM_passes
+from test_corelab.IRprinter import run_TritonToTritonGPU_passes
 
 # DEVICE = triton.runtime.driver.active.get_active_torch_device()
 
@@ -289,7 +292,7 @@ def matmul_kernel(
     # while the accumulator is still in FP32!
     if ACTIVATION == "leaky_relu":
         accumulator = leaky_relu(accumulator)
-    c = accumulator.to(tl.float16)
+    c = accumulator.to(tl.float32)
     offs_cm = pid_m * BLOCK_SIZE_M + tl.arange(0, BLOCK_SIZE_M)
     offs_cn = pid_n * BLOCK_SIZE_N + tl.arange(0, BLOCK_SIZE_N)
     c_ptrs = c_ptr + stride_cm * offs_cm[:, None] + stride_cn * offs_cn[None, :]
@@ -312,12 +315,12 @@ def matmul(a, b, activation=""):
     M, K = a.shape
     K, N = b.shape
     # Allocates output.
-    c = torch.empty((M, N), device=a.device, dtype=torch.float16)
+    c = torch.empty((M, N), device=a.device, dtype=torch.float32)
     # 1D launch kernel where each block gets its own program.
     # import ipdb; ipdb.set_trace()
     grid = lambda META: (triton.cdiv(M, META['BLOCK_SIZE_M']) * triton.cdiv(N, META['BLOCK_SIZE_N']), )
     # import ipdb; ipdb.set_trace()
-    matmul_kernel[grid](
+    compiled_kernel = matmul_kernel[grid](
         a, b, c,  #
         M, N, K,  #
         a.stride(0), a.stride(1),  #
@@ -325,13 +328,12 @@ def matmul(a, b, activation=""):
         c.stride(0), c.stride(1),  #
         ACTIVATION=activation  #
     )
+    print_ir(compiled_kernel)
+    ttir_file = "/home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttir.mlir"
+    ttgir_file = "/home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.mlir"
+    run_TritonToTritonGPU_passes(ttir_file)
+    run_TritonGPUToLLVM_passes(ttgir_file)
     return c
-
-DEVICE = "cuda"
-torch.manual_seed(0)
-a = torch.randn((512, 512), device=DEVICE, dtype=torch.float16)
-b = torch.randn((512, 512), device=DEVICE, dtype=torch.float16)
-triton_output = matmul(a, b)
 
 # %%
 # Unit Test
@@ -339,10 +341,9 @@ triton_output = matmul(a, b)
 #
 # We can test our custom matrix multiplication operation against a native torch implementation (i.e., cuBLAS).
 
-DEVICE = "cuda"
 torch.manual_seed(0)
-a = torch.randn((512, 512), device=DEVICE, dtype=torch.float16)
-b = torch.randn((512, 512), device=DEVICE, dtype=torch.float16)
+a = torch.randn((512, 512), device=DEVICE, dtype=torch.float32)
+b = torch.randn((512, 512), device=DEVICE, dtype=torch.float32)
 triton_output = matmul(a, b)
 torch_output = torch.matmul(a, b)
 print(f"triton_output_with_fp16_inputs={triton_output}")
@@ -356,23 +357,23 @@ if torch.allclose(triton_output, torch_output, atol=1e-2, rtol=rtol):
 else:
     print("❌ Triton and Torch differ")
 
-TORCH_HAS_FP8 = hasattr(torch, "float8_e5m2")
-if TORCH_HAS_FP8 and is_cuda():
-    torch.manual_seed(0)
-    a = torch.randn((512, 512), device=DEVICE, dtype=torch.float16)
-    b = torch.randn((512, 512), device=DEVICE, dtype=torch.float16)
-    a = a.to(torch.float8_e5m2)
-    # pre-transpose b for efficiency.
-    b = b.T
-    b = b.to(torch.float8_e5m2)
-    triton_output = matmul(a, b)
-    torch_output = torch.matmul(a.to(torch.float16), b.to(torch.float16))
-    print(f"triton_output_with_fp8_inputs={triton_output}")
-    print(f"torch_output_with_fp8_inputs={torch_output}")
-    if torch.allclose(triton_output, torch_output, atol=0.125, rtol=0):
-        print("✅ Triton and Torch match")
-    else:
-        print("❌ Triton and Torch differ")
+# TORCH_HAS_FP8 = hasattr(torch, "float8_e5m2")
+# if TORCH_HAS_FP8 and is_cuda():
+#     torch.manual_seed(0)
+#     a = torch.randn((512, 512), device=DEVICE, dtype=torch.float32)
+#     b = torch.randn((512, 512), device=DEVICE, dtype=torch.float32)
+#     a = a.to(torch.float8_e5m2)
+#     # pre-transpose b for efficiency.
+#     b = b.T
+#     b = b.to(torch.float8_e5m2)
+#     triton_output = matmul(a, b)
+#     torch_output = torch.matmul(a.to(torch.float32), b.to(torch.float32))
+#     print(f"triton_output_with_fp8_inputs={triton_output}")
+#     print(f"torch_output_with_fp8_inputs={torch_output}")
+#     if torch.allclose(triton_output, torch_output, atol=0.125, rtol=0):
+#         print("✅ Triton and Torch match")
+#     else:
+#         print("❌ Triton and Torch differ")
 
 # %%
 # Benchmark
@@ -384,44 +385,44 @@ if TORCH_HAS_FP8 and is_cuda():
 # We can now compare the performance of our kernel against that of cuBLAS or rocBLAS. Here we focus on square matrices,
 # but feel free to arrange this script as you wish to benchmark any other matrix shape.
 
-ref_lib = 'cuBLAS' if is_cuda() else 'rocBLAS'
+# ref_lib = 'cuBLAS' if is_cuda() else 'rocBLAS'
 
-configs = []
-for fp8_inputs in [False, True]:
-    if fp8_inputs and (not TORCH_HAS_FP8 or not is_cuda()):
-        continue
-    configs.append(
-        triton.testing.Benchmark(
-            x_names=["M", "N", "K"],  # Argument names to use as an x-axis for the plot
-            x_vals=[128 * i for i in range(2, 33)],  # Different possible values for `x_name`
-            line_arg="provider",  # Argument name whose value corresponds to a different line in the plot
-            # Possible values for `line_arg`
-            # Don't compare to cublas for fp8 cases as torch.matmul doesn't support fp8 at the moment.
-            line_vals=["triton"] if fp8_inputs else [ref_lib.lower(), "triton"],  # Label name for the lines
-            line_names=["Triton"] if fp8_inputs else [ref_lib, "Triton"],  # Line styles
-            styles=[("green", "-"), ("blue", "-")],
-            ylabel="TFLOPS",  # Label name for the y-axis
-            plot_name="matmul-performance-" +
-            ("fp16" if not fp8_inputs else "fp8"),  # Name for the plot, used also as a file name for saving the plot.
-            args={"fp8_inputs": fp8_inputs},
-        ))
-
-
-@triton.testing.perf_report(configs)
-def benchmark(M, N, K, provider, fp8_inputs):
-    a = torch.randn((M, K), device=DEVICE, dtype=torch.float32)
-    b = torch.randn((K, N), device=DEVICE, dtype=torch.float32)
-    if TORCH_HAS_FP8 and fp8_inputs:
-        a = a.to(torch.float8_e5m2)
-        b = b.T
-        b = b.to(torch.float8_e5m2)
-    quantiles = [0.5, 0.2, 0.8]
-    if provider == ref_lib.lower():
-        ms, min_ms, max_ms = triton.testing.do_bench(lambda: torch.matmul(a, b), quantiles=quantiles)
-    if provider == 'triton':
-        ms, min_ms, max_ms = triton.testing.do_bench(lambda: matmul(a, b), quantiles=quantiles)
-    perf = lambda ms: 2 * M * N * K * 1e-12 / (ms * 1e-3)
-    return perf(ms), perf(max_ms), perf(min_ms)
+# configs = []
+# for fp8_inputs in [False, True]:
+#     if fp8_inputs and (not TORCH_HAS_FP8 or not is_cuda()):
+#         continue
+#     configs.append(
+#         triton.testing.Benchmark(
+#             x_names=["M", "N", "K"],  # Argument names to use as an x-axis for the plot
+#             x_vals=[128 * i for i in range(2, 33)],  # Different possible values for `x_name`
+#             line_arg="provider",  # Argument name whose value corresponds to a different line in the plot
+#             # Possible values for `line_arg`
+#             # Don't compare to cublas for fp8 cases as torch.matmul doesn't support fp8 at the moment.
+#             line_vals=["triton"] if fp8_inputs else [ref_lib.lower(), "triton"],  # Label name for the lines
+#             line_names=["Triton"] if fp8_inputs else [ref_lib, "Triton"],  # Line styles
+#             styles=[("green", "-"), ("blue", "-")],
+#             ylabel="TFLOPS",  # Label name for the y-axis
+#             plot_name="matmul-performance-" +
+#             ("fp16" if not fp8_inputs else "fp8"),  # Name for the plot, used also as a file name for saving the plot.
+#             args={"fp8_inputs": fp8_inputs},
+#         ))
 
 
-benchmark.run(show_plots=True, print_data=True)
+# @triton.testing.perf_report(configs)
+# def benchmark(M, N, K, provider, fp8_inputs):
+#     a = torch.randn((M, K), device=DEVICE, dtype=torch.float32)
+#     b = torch.randn((K, N), device=DEVICE, dtype=torch.float32)
+#     if TORCH_HAS_FP8 and fp8_inputs:
+#         a = a.to(torch.float8_e5m2)
+#         b = b.T
+#         b = b.to(torch.float8_e5m2)
+#     quantiles = [0.5, 0.2, 0.8]
+#     if provider == ref_lib.lower():
+#         ms, min_ms, max_ms = triton.testing.do_bench(lambda: torch.matmul(a, b), quantiles=quantiles)
+#     if provider == 'triton':
+#         ms, min_ms, max_ms = triton.testing.do_bench(lambda: matmul(a, b), quantiles=quantiles)
+#     perf = lambda ms: 2 * M * N * K * 1e-12 / (ms * 1e-3)
+#     return perf(ms), perf(max_ms), perf(min_ms)
+
+
+# benchmark.run(show_plots=True, print_data=True)

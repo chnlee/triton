@@ -27,9 +27,9 @@
 	.reg .b32 	%r<672>;
 	.reg .f32 	%f<2881>;
 	.reg .b64 	%rd<84>;
-	.loc	1 247 0                         // 03-matrix-multiplication.py:247:0
+	.loc	1 249 0                         // 03-matrix-multiplication.py:249:0
 $L__func_begin0:
-	.loc	1 247 0                         // 03-matrix-multiplication.py:247:0
+	.loc	1 249 0                         // 03-matrix-multiplication.py:249:0
 
 // %bb.0:
 	ld.param.u32 	%r154, [matmul_kernel_param_8];
@@ -38,7 +38,7 @@ $L__func_begin0:
 	ld.param.u32 	%r149, [matmul_kernel_param_3];
 	ld.param.u64 	%rd20, [matmul_kernel_param_2];
 $L__tmp0:
-	.loc	1 263 24                        // 03-matrix-multiplication.py:263:24
+	.loc	1 265 24                        // 03-matrix-multiplication.py:265:24
 	// begin inline asm
 	mov.u32 %r155, %ctaid.x;
 	// end inline asm
@@ -59,46 +59,46 @@ $L__tmp2:
 	add.s32 	%r228, %r225, %r227;
 	shr.s32 	%r229, %r228, 6;
 $L__tmp3:
-	.loc	1 266 38                        // 03-matrix-multiplication.py:266:38
+	.loc	1 268 38                        // 03-matrix-multiplication.py:268:38
 	shl.b32 	%r231, %r229, 3;
-	.loc	1 267 22                        // 03-matrix-multiplication.py:267:22
+	.loc	1 269 22                        // 03-matrix-multiplication.py:269:22
 	div.s32 	%r232, %r155, %r231;
-	.loc	1 268 29                        // 03-matrix-multiplication.py:268:29
+	.loc	1 270 29                        // 03-matrix-multiplication.py:270:29
 	shl.b32 	%r233, %r232, 3;
-	.loc	1 269 35                        // 03-matrix-multiplication.py:269:35
+	.loc	1 271 35                        // 03-matrix-multiplication.py:271:35
 	sub.s32 	%r234, %r224, %r233;
-	.loc	1 269 48                        // 03-matrix-multiplication.py:269:48
+	.loc	1 271 48                        // 03-matrix-multiplication.py:271:48
 	min.s32 	%r236, %r234, 8;
-	.loc	1 270 34                        // 03-matrix-multiplication.py:270:34
+	.loc	1 272 34                        // 03-matrix-multiplication.py:272:34
 	mul.lo.s32 	%r237, %r232, %r231;
 	sub.s32 	%r238, %r155, %r237;
-	.loc	1 271 40                        // 03-matrix-multiplication.py:271:40
+	.loc	1 273 40                        // 03-matrix-multiplication.py:273:40
 	div.s32 	%r239, %r238, %r236;
-	.loc	1 270 54                        // 03-matrix-multiplication.py:270:54
+	.loc	1 272 54                        // 03-matrix-multiplication.py:272:54
 	mul.lo.s32 	%r240, %r239, %r236;
 	sub.s32 	%r241, %r238, %r240;
-	.loc	1 270 27                        // 03-matrix-multiplication.py:270:27
+	.loc	1 272 27                        // 03-matrix-multiplication.py:272:27
 	add.s32 	%r242, %r241, %r233;
-	.loc	1 273 23                        // 03-matrix-multiplication.py:273:23
+	.loc	1 275 23                        // 03-matrix-multiplication.py:275:23
 	shl.b32 	%r1, %r242, 7;
-	.loc	1 273 51                        // 03-matrix-multiplication.py:273:51
+	.loc	1 275 51                        // 03-matrix-multiplication.py:275:51
 	mov.u32 	%r2, %tid.x;
 	bfe.u32 	%r3, %r2, 4, 3;
 	or.b32  	%r4, %r3, 8;
 	or.b32  	%r5, %r3, 16;
 	or.b32  	%r6, %r3, 24;
-	.loc	1 274 23                        // 03-matrix-multiplication.py:274:23
+	.loc	1 276 23                        // 03-matrix-multiplication.py:276:23
 	shl.b32 	%r243, %r239, 6;
-	.loc	1 274 51                        // 03-matrix-multiplication.py:274:51
+	.loc	1 276 51                        // 03-matrix-multiplication.py:276:51
 	shl.b32 	%r7, %r2, 2;
 	and.b32  	%r9, %r7, 60;
-	.loc	1 274 38                        // 03-matrix-multiplication.py:274:38
+	.loc	1 276 38                        // 03-matrix-multiplication.py:276:38
 	or.b32  	%r10, %r243, %r9;
 $L__tmp4:
 	.loc	2 40 22                         // standard.py:40:22
 	add.s32 	%r244, %r606, 31;
 $L__tmp5:
-	.loc	1 279 22                        // 03-matrix-multiplication.py:279:22
+	.loc	1 281 22                        // 03-matrix-multiplication.py:281:22
 	setp.lt.s32 	%p1, %r244, 32;
 	mov.b32 	%r608, 0;
 	mov.u32 	%r605, global_smem;
@@ -177,60 +177,60 @@ $L__tmp5:
 	shr.u32 	%r246, %r245, 27;
 	add.s32 	%r247, %r244, %r246;
 	shr.s32 	%r607, %r247, 5;
-	.loc	1 288 33                        // 03-matrix-multiplication.py:288:33
+	.loc	1 290 33                        // 03-matrix-multiplication.py:290:33
 	shl.b32 	%r248, %r153, 5;
-	.loc	1 274 68                        // 03-matrix-multiplication.py:274:68
+	.loc	1 276 68                        // 03-matrix-multiplication.py:276:68
 	rem.s32 	%r249, %r10, %r150;
-	.loc	1 277 52                        // 03-matrix-multiplication.py:277:52
+	.loc	1 279 52                        // 03-matrix-multiplication.py:279:52
 	mad.lo.s32 	%r250, %r153, %r3, %r249;
-	.loc	1 273 51                        // 03-matrix-multiplication.py:273:51
+	.loc	1 275 51                        // 03-matrix-multiplication.py:275:51
 	bfe.u32 	%r251, %r2, 3, 4;
 	or.b32  	%r252, %r1, %r251;
-	.loc	1 273 38                        // 03-matrix-multiplication.py:273:38
+	.loc	1 275 38                        // 03-matrix-multiplication.py:275:38
 	or.b32  	%r253, %r252, 112;
-	.loc	1 273 68                        // 03-matrix-multiplication.py:273:68
+	.loc	1 275 68                        // 03-matrix-multiplication.py:275:68
 	rem.s32 	%r254, %r253, %r149;
-	.loc	1 276 53                        // 03-matrix-multiplication.py:276:53
+	.loc	1 278 53                        // 03-matrix-multiplication.py:278:53
 	mad.lo.s32 	%r255, %r254, %r152, %r8;
-	.loc	1 273 38                        // 03-matrix-multiplication.py:273:38
+	.loc	1 275 38                        // 03-matrix-multiplication.py:275:38
 	or.b32  	%r256, %r252, 96;
-	.loc	1 273 68                        // 03-matrix-multiplication.py:273:68
+	.loc	1 275 68                        // 03-matrix-multiplication.py:275:68
 	rem.s32 	%r257, %r256, %r149;
-	.loc	1 276 53                        // 03-matrix-multiplication.py:276:53
+	.loc	1 278 53                        // 03-matrix-multiplication.py:278:53
 	mad.lo.s32 	%r258, %r257, %r152, %r8;
-	.loc	1 273 38                        // 03-matrix-multiplication.py:273:38
+	.loc	1 275 38                        // 03-matrix-multiplication.py:275:38
 	or.b32  	%r259, %r252, 80;
-	.loc	1 273 68                        // 03-matrix-multiplication.py:273:68
+	.loc	1 275 68                        // 03-matrix-multiplication.py:275:68
 	rem.s32 	%r260, %r259, %r149;
-	.loc	1 276 53                        // 03-matrix-multiplication.py:276:53
+	.loc	1 278 53                        // 03-matrix-multiplication.py:278:53
 	mad.lo.s32 	%r261, %r260, %r152, %r8;
-	.loc	1 273 38                        // 03-matrix-multiplication.py:273:38
+	.loc	1 275 38                        // 03-matrix-multiplication.py:275:38
 	or.b32  	%r262, %r252, 64;
-	.loc	1 273 68                        // 03-matrix-multiplication.py:273:68
+	.loc	1 275 68                        // 03-matrix-multiplication.py:275:68
 	rem.s32 	%r263, %r262, %r149;
-	.loc	1 276 53                        // 03-matrix-multiplication.py:276:53
+	.loc	1 278 53                        // 03-matrix-multiplication.py:278:53
 	mad.lo.s32 	%r264, %r263, %r152, %r8;
-	.loc	1 273 38                        // 03-matrix-multiplication.py:273:38
+	.loc	1 275 38                        // 03-matrix-multiplication.py:275:38
 	or.b32  	%r265, %r252, 48;
-	.loc	1 273 68                        // 03-matrix-multiplication.py:273:68
+	.loc	1 275 68                        // 03-matrix-multiplication.py:275:68
 	rem.s32 	%r266, %r265, %r149;
-	.loc	1 276 53                        // 03-matrix-multiplication.py:276:53
+	.loc	1 278 53                        // 03-matrix-multiplication.py:278:53
 	mad.lo.s32 	%r267, %r266, %r152, %r8;
-	.loc	1 273 38                        // 03-matrix-multiplication.py:273:38
+	.loc	1 275 38                        // 03-matrix-multiplication.py:275:38
 	or.b32  	%r268, %r252, 32;
-	.loc	1 273 68                        // 03-matrix-multiplication.py:273:68
+	.loc	1 275 68                        // 03-matrix-multiplication.py:275:68
 	rem.s32 	%r269, %r268, %r149;
-	.loc	1 276 53                        // 03-matrix-multiplication.py:276:53
+	.loc	1 278 53                        // 03-matrix-multiplication.py:278:53
 	mad.lo.s32 	%r270, %r269, %r152, %r8;
-	.loc	1 273 38                        // 03-matrix-multiplication.py:273:38
+	.loc	1 275 38                        // 03-matrix-multiplication.py:275:38
 	or.b32  	%r271, %r252, 16;
-	.loc	1 273 68                        // 03-matrix-multiplication.py:273:68
+	.loc	1 275 68                        // 03-matrix-multiplication.py:275:68
 	rem.s32 	%r272, %r271, %r149;
-	.loc	1 276 53                        // 03-matrix-multiplication.py:276:53
+	.loc	1 278 53                        // 03-matrix-multiplication.py:278:53
 	mad.lo.s32 	%r273, %r272, %r152, %r8;
-	.loc	1 273 68                        // 03-matrix-multiplication.py:273:68
+	.loc	1 275 68                        // 03-matrix-multiplication.py:275:68
 	rem.s32 	%r274, %r252, %r149;
-	.loc	1 276 53                        // 03-matrix-multiplication.py:276:53
+	.loc	1 278 53                        // 03-matrix-multiplication.py:278:53
 	mad.lo.s32 	%r275, %r274, %r152, %r8;
 	shl.b32 	%r276, %r8, 2;
 	shl.b32 	%r277, %r251, 7;
@@ -245,7 +245,7 @@ $L__tmp5:
 	and.b32  	%r285, %r284, 3584;
 	add.s32 	%r15, %r605, %r285;
 	add.s32 	%r16, %r283, %r281;
-	.loc	1 279 22                        // 03-matrix-multiplication.py:279:22
+	.loc	1 281 22                        // 03-matrix-multiplication.py:281:22
 	mad.lo.s32 	%r287, %r153, %r6, %r249;
 	mul.wide.s32 	%rd1, %r287, 4;
 	mul.wide.s32 	%rd2, %r248, 4;
@@ -327,7 +327,7 @@ $L__tmp5:
 	mov.f32 	%f2879, %f2817;
 	mov.f32 	%f2880, %f2817;
 $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
-	.loc	1 282 59                        // 03-matrix-multiplication.py:282:59
+	.loc	1 284 59                        // 03-matrix-multiplication.py:284:59
 	add.s64 	%rd32, %rd83, %rd1;
 	add.s64 	%rd31, %rd83, %rd3;
 	add.s64 	%rd30, %rd83, %rd4;
@@ -340,10 +340,10 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	add.s64 	%rd23, %rd82, %rd11;
 	add.s64 	%rd22, %rd82, %rd12;
 	add.s64 	%rd21, %rd82, %rd13;
-	.loc	1 282 51                        // 03-matrix-multiplication.py:282:51
+	.loc	1 284 51                        // 03-matrix-multiplication.py:284:51
 	setp.lt.s32 	%p2, %r8, %r606;
 	mov.b32 	%r296, 0;
-	.loc	1 282 20                        // 03-matrix-multiplication.py:282:20
+	.loc	1 284 20                        // 03-matrix-multiplication.py:284:20
 	// begin inline asm
 	mov.u32 %r292, %r296;
 	mov.u32 %r293, %r296;
@@ -409,12 +409,12 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	st.shared.v4.u32 	[%r12+10240], {%r332, %r333, %r334, %r335};
 	st.shared.v4.u32 	[%r12+12288], {%r340, %r341, %r342, %r343};
 	st.shared.v4.u32 	[%r12+14336], {%r348, %r349, %r350, %r351};
-	.loc	1 283 51                        // 03-matrix-multiplication.py:283:51
+	.loc	1 285 51                        // 03-matrix-multiplication.py:285:51
 	setp.lt.s32 	%p10, %r3, %r606;
 	setp.lt.s32 	%p11, %r4, %r606;
 	setp.lt.s32 	%p12, %r5, %r606;
 	setp.lt.s32 	%p13, %r6, %r606;
-	.loc	1 283 20                        // 03-matrix-multiplication.py:283:20
+	.loc	1 285 20                        // 03-matrix-multiplication.py:285:20
 	// begin inline asm
 	mov.u32 %r356, %r296;
 	mov.u32 %r357, %r296;
@@ -447,7 +447,7 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	st.shared.v4.u32 	[%r13+2048], {%r364, %r365, %r366, %r367};
 	st.shared.v4.u32 	[%r13+4096], {%r372, %r373, %r374, %r375};
 	st.shared.v4.u32 	[%r13+6144], {%r380, %r381, %r382, %r383};
-	.loc	1 282 20                        // 03-matrix-multiplication.py:282:20
+	.loc	1 284 20                        // 03-matrix-multiplication.py:284:20
 	bar.sync 	0;
 	ld.shared.v4.f32 	{%f193, %f194, %f195, %f196}, [%r15+112];
 	ld.shared.v4.f32 	{%f197, %f198, %f199, %f200}, [%r15+96];
@@ -577,7 +577,7 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	ld.shared.v4.f32 	{%f693, %f694, %f695, %f696}, [%r15+12704];
 	ld.shared.v4.f32 	{%f697, %f698, %f699, %f700}, [%r15+12688];
 	ld.shared.v4.f32 	{%f701, %f702, %f703, %f704}, [%r15+12672];
-	.loc	1 283 20                        // 03-matrix-multiplication.py:283:20
+	.loc	1 285 20                        // 03-matrix-multiplication.py:285:20
 	ld.shared.v4.f32 	{%f705, %f706, %f707, %f708}, [%r16];
 	ld.shared.v4.f32 	{%f709, %f710, %f711, %f712}, [%r16+256];
 	ld.shared.v4.f32 	{%f713, %f714, %f715, %f716}, [%r16+512];
@@ -589,7 +589,7 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	ld.shared.v4.f32 	{%f737, %f738, %f739, %f740}, [%r16+2048];
 	ld.shared.v4.f32 	{%f741, %f742, %f743, %f744}, [%r16+2304];
 	ld.shared.v4.f32 	{%f745, %f746, %f747, %f748}, [%r16+2560];
-	.loc	1 285 35                        // 03-matrix-multiplication.py:285:35
+	.loc	1 287 35                        // 03-matrix-multiplication.py:287:35
 	fma.rn.f32 	%f749, %f701, %f708, %f2880;
 	fma.rn.f32 	%f750, %f701, %f707, %f2879;
 	fma.rn.f32 	%f751, %f701, %f706, %f2878;
@@ -1294,7 +1294,7 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	fma.rn.f32 	%f1450, %f343, %f746, %f1327;
 	fma.rn.f32 	%f1451, %f343, %f747, %f1326;
 	fma.rn.f32 	%f1452, %f343, %f748, %f1325;
-	.loc	1 283 20                        // 03-matrix-multiplication.py:283:20
+	.loc	1 285 20                        // 03-matrix-multiplication.py:285:20
 	ld.shared.v4.f32 	{%f1453, %f1454, %f1455, %f1456}, [%r16+2816];
 	ld.shared.v4.f32 	{%f1457, %f1458, %f1459, %f1460}, [%r16+3072];
 	ld.shared.v4.f32 	{%f1461, %f1462, %f1463, %f1464}, [%r16+3328];
@@ -1306,7 +1306,7 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	ld.shared.v4.f32 	{%f1485, %f1486, %f1487, %f1488}, [%r16+4864];
 	ld.shared.v4.f32 	{%f1489, %f1490, %f1491, %f1492}, [%r16+5120];
 	ld.shared.v4.f32 	{%f1493, %f1494, %f1495, %f1496}, [%r16+5376];
-	.loc	1 285 35                        // 03-matrix-multiplication.py:285:35
+	.loc	1 287 35                        // 03-matrix-multiplication.py:287:35
 	fma.rn.f32 	%f1497, %f344, %f1456, %f1452;
 	fma.rn.f32 	%f1498, %f344, %f1455, %f1451;
 	fma.rn.f32 	%f1499, %f344, %f1454, %f1450;
@@ -2011,7 +2011,7 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	fma.rn.f32 	%f2198, %f682, %f1494, %f2075;
 	fma.rn.f32 	%f2199, %f682, %f1495, %f2074;
 	fma.rn.f32 	%f2200, %f682, %f1496, %f2073;
-	.loc	1 283 20                        // 03-matrix-multiplication.py:283:20
+	.loc	1 285 20                        // 03-matrix-multiplication.py:285:20
 	ld.shared.v4.f32 	{%f2201, %f2202, %f2203, %f2204}, [%r16+5632];
 	ld.shared.v4.f32 	{%f2205, %f2206, %f2207, %f2208}, [%r16+5888];
 	ld.shared.v4.f32 	{%f2209, %f2210, %f2211, %f2212}, [%r16+6144];
@@ -2022,7 +2022,7 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	ld.shared.v4.f32 	{%f2229, %f2230, %f2231, %f2232}, [%r16+7424];
 	ld.shared.v4.f32 	{%f2233, %f2234, %f2235, %f2236}, [%r16+7680];
 	ld.shared.v4.f32 	{%f2237, %f2238, %f2239, %f2240}, [%r16+7936];
-	.loc	1 285 35                        // 03-matrix-multiplication.py:285:35
+	.loc	1 287 35                        // 03-matrix-multiplication.py:287:35
 	fma.rn.f32 	%f2241, %f683, %f2204, %f2200;
 	fma.rn.f32 	%f2242, %f683, %f2203, %f2199;
 	fma.rn.f32 	%f2243, %f683, %f2202, %f2198;
@@ -2663,7 +2663,7 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	fma.rn.f32 	%f2878, %f676, %f2238, %f2755;
 	fma.rn.f32 	%f2879, %f676, %f2239, %f2754;
 	fma.rn.f32 	%f2880, %f676, %f2240, %f2753;
-	.loc	1 279 22                        // 03-matrix-multiplication.py:279:22
+	.loc	1 281 22                        // 03-matrix-multiplication.py:281:22
 	add.s64 	%rd83, %rd83, %rd2;
 	add.s64 	%rd82, %rd82, 128;
 	add.s32 	%r607, %r607, -1;
@@ -2671,7 +2671,7 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	setp.ne.s32 	%p14, %r607, 0;
 	@%p14 bra 	$L__BB0_2;
 // %bb.3:                               // %._crit_edge.loopexit
-	.loc	1 298 21                        // 03-matrix-multiplication.py:298:21
+	.loc	1 300 21                        // 03-matrix-multiplication.py:300:21
 	mov.b32 	%r608, %f2817;
 	mov.b32 	%r609, %f2818;
 	mov.b32 	%r610, %f2819;
@@ -2737,9 +2737,9 @@ $L__BB0_2:                              // =>This Inner Loop Header: Depth=1
 	mov.b32 	%r670, %f2879;
 	mov.b32 	%r671, %f2880;
 $L__BB0_4:                              // %._crit_edge
-	.loc	1 273 51                        // 03-matrix-multiplication.py:273:51
+	.loc	1 275 51                        // 03-matrix-multiplication.py:275:51
 	or.b32  	%r532, %r1, %r3;
-	.loc	1 273 38                        // 03-matrix-multiplication.py:273:38
+	.loc	1 275 38                        // 03-matrix-multiplication.py:275:38
 	or.b32  	%r533, %r532, 120;
 	or.b32  	%r534, %r532, 112;
 	or.b32  	%r535, %r532, 104;
@@ -2755,7 +2755,7 @@ $L__BB0_4:                              // %._crit_edge
 	or.b32  	%r545, %r1, %r6;
 	or.b32  	%r546, %r1, %r5;
 	or.b32  	%r547, %r1, %r4;
-	.loc	1 296 33                        // 03-matrix-multiplication.py:296:33
+	.loc	1 298 33                        // 03-matrix-multiplication.py:298:33
 	mul.lo.s32 	%r548, %r532, %r154;
 	mul.lo.s32 	%r549, %r547, %r154;
 	mul.lo.s32 	%r550, %r546, %r154;
@@ -2774,7 +2774,7 @@ $L__BB0_4:                              // %._crit_edge
 	add.s32 	%r563, %r562, %r554;
 	add.s32 	%r564, %r563, %r554;
 	add.s32 	%r565, %r564, %r554;
-	.loc	1 296 21                        // 03-matrix-multiplication.py:296:21
+	.loc	1 298 21                        // 03-matrix-multiplication.py:298:21
 	mul.wide.s32 	%rd49, %r548, 4;
 	add.s64 	%rd50, %rd20, %rd49;
 	mul.wide.s32 	%rd51, %r549, 4;
@@ -2807,7 +2807,7 @@ $L__BB0_4:                              // %._crit_edge
 	add.s64 	%rd78, %rd20, %rd77;
 	mul.wide.s32 	%rd79, %r565, 4;
 	add.s64 	%rd80, %rd20, %rd79;
-	.loc	1 296 52                        // 03-matrix-multiplication.py:296:52
+	.loc	1 298 52                        // 03-matrix-multiplication.py:298:52
 	mul.wide.s32 	%rd81, %r10, 4;
 	add.s64 	%rd33, %rd50, %rd81;
 	add.s64 	%rd34, %rd52, %rd81;
@@ -2825,7 +2825,7 @@ $L__BB0_4:                              // %._crit_edge
 	add.s64 	%rd46, %rd76, %rd81;
 	add.s64 	%rd47, %rd78, %rd81;
 	add.s64 	%rd48, %rd80, %rd81;
-	.loc	1 297 33                        // 03-matrix-multiplication.py:297:33
+	.loc	1 299 33                        // 03-matrix-multiplication.py:299:33
 	setp.lt.s32 	%p47, %r532, %r149;
 	setp.lt.s32 	%p48, %r547, %r149;
 	setp.lt.s32 	%p49, %r546, %r149;
@@ -2842,9 +2842,9 @@ $L__BB0_4:                              // %._crit_edge
 	setp.lt.s32 	%p60, %r535, %r149;
 	setp.lt.s32 	%p61, %r534, %r149;
 	setp.lt.s32 	%p62, %r533, %r149;
-	.loc	1 297 58                        // 03-matrix-multiplication.py:297:58
+	.loc	1 299 58                        // 03-matrix-multiplication.py:299:58
 	setp.lt.s32 	%p63, %r10, %r150;
-	.loc	1 297 39                        // 03-matrix-multiplication.py:297:39
+	.loc	1 299 39                        // 03-matrix-multiplication.py:299:39
 	and.pred  	%p31, %p47, %p63;
 	and.pred  	%p32, %p48, %p63;
 	and.pred  	%p33, %p49, %p63;
@@ -2861,7 +2861,7 @@ $L__BB0_4:                              // %._crit_edge
 	and.pred  	%p44, %p60, %p63;
 	and.pred  	%p45, %p61, %p63;
 	and.pred  	%p46, %p62, %p63;
-	.loc	1 298 21                        // 03-matrix-multiplication.py:298:21
+	.loc	1 300 21                        // 03-matrix-multiplication.py:300:21
 	bar.sync 	0;
 	shl.b32 	%r566, %r2, 4;
 	and.b32  	%r567, %r566, 1792;
@@ -3025,7 +3025,7 @@ $L__BB0_4:                              // %._crit_edge
 	// begin inline asm
 	@%p46 st.global.v4.b32 [ %rd48 + 0 ], { %r528, %r529, %r530, %r531 };
 	// end inline asm
-	.loc	1 298 4                         // 03-matrix-multiplication.py:298:4
+	.loc	1 300 4                         // 03-matrix-multiplication.py:300:4
 	ret;
 $L__tmp6:
 $L__func_end0:
@@ -3195,7 +3195,7 @@ $L__func_end0:
 .b64 $L__tmp1                           // DW_AT_low_pc
 .b64 $L__tmp2                           // DW_AT_high_pc
 .b8 1                                   // DW_AT_call_file
-.b8 8                                   // DW_AT_call_line
+.b8 10                                  // DW_AT_call_line
 .b8 1
 .b8 27                                  // DW_AT_call_column
 .b8 4                                   // Abbrev [4] 0x96:0x19 DW_TAG_inlined_subroutine
@@ -3203,7 +3203,7 @@ $L__func_end0:
 .b64 $L__tmp2                           // DW_AT_low_pc
 .b64 $L__tmp3                           // DW_AT_high_pc
 .b8 1                                   // DW_AT_call_file
-.b8 9                                   // DW_AT_call_line
+.b8 11                                  // DW_AT_call_line
 .b8 1
 .b8 27                                  // DW_AT_call_column
 .b8 4                                   // Abbrev [4] 0xaf:0x19 DW_TAG_inlined_subroutine
@@ -3211,7 +3211,7 @@ $L__func_end0:
 .b64 $L__tmp4                           // DW_AT_low_pc
 .b64 $L__tmp5                           // DW_AT_high_pc
 .b8 1                                   // DW_AT_call_file
-.b8 23                                  // DW_AT_call_line
+.b8 25                                  // DW_AT_call_line
 .b8 1
 .b8 33                                  // DW_AT_call_column
 .b8 0                                   // End Of Children Mark
