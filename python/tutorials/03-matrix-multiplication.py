@@ -153,9 +153,14 @@ import torch
 
 import triton
 import triton.language as tl
+from test_corelab.IRprinter import print_ir
+from test_corelab.IRprinter import run_TritonGPUToLLVM_passes
+from test_corelab.IRprinter import run_TritonToTritonGPU_passes
 
 # DEVICE = triton.runtime.driver.active.get_active_torch_device()
+
 DEVICE = "cuda"
+
 
 def is_cuda():
     return triton.runtime.driver.active.get_current_target().backend == "cuda"
@@ -314,7 +319,7 @@ def matmul(a, b, activation=""):
     # 1D launch kernel where each block gets its own program.
     # import ipdb; ipdb.set_trace()
     grid = lambda META: (triton.cdiv(M, META['BLOCK_SIZE_M']) * triton.cdiv(N, META['BLOCK_SIZE_N']), )
-    # import ipdb; ipdb.setq_trace()
+    import ipdb; ipdb.set_trace()
     matmul_kernel[grid](
         a, b, c,  #
         M, N, K,  #
@@ -323,13 +328,18 @@ def matmul(a, b, activation=""):
         c.stride(0), c.stride(1),  #
         ACTIVATION=activation  #
     )
+    print_ir(compiled_kernel)
+    ttir_file = "/home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttir.mlir"
+    ttgir_file = "/home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.mlir"
+    run_TritonToTritonGPU_passes(ttir_file)
+    run_TritonGPUToLLVM_passes(ttgir_file)
     return c
 
-# DEVICE = "cuda"
-# torch.manual_seed(0)
-# a = torch.randn((512, 512), device=DEVICE, dtype=torch.float32)
-# b = torch.randn((512, 512), device=DEVICE, dtype=torch.float32)
-# triton_output = matmul(a, b)
+DEVICE = "cuda"
+torch.manual_seed(0)
+a = torch.randn((512, 512), device=DEVICE, dtype=torch.float16)
+b = torch.randn((512, 512), device=DEVICE, dtype=torch.float16)
+triton_output = matmul(a, b)
 
 # %%
 # Unit Test
@@ -337,7 +347,6 @@ def matmul(a, b, activation=""):
 #
 # We can test our custom matrix multiplication operation against a native torch implementation (i.e., cuBLAS).
 
-DEVICE = "cuda"
 torch.manual_seed(0)
 a = torch.randn((512, 512), device=DEVICE, dtype=torch.float32)
 b = torch.randn((512, 512), device=DEVICE, dtype=torch.float32)

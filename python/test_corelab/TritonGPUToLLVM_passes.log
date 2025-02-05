@@ -1,0 +1,22 @@
+===> Applying Pass: tritongpu-combine-tensor-select-and-if
+Output File: /home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.0.tritongpu-combine-tensor-select-and-if.llir.mlir
+===> Applying Pass: convert-scf-to-cf
+Output File: /home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.1.convert-scf-to-cf.llir.mlir
+===> Applying Pass: convert-index-to-llvm
+Output File: /home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.2.convert-index-to-llvm.llir.mlir
+===> Applying Pass: allocate-shared-memory
+Output File: /home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.3.allocate-shared-memory.llir.mlir
+===> Applying Pass: tritongpu-global-scratch-memory-allocation
+Output File: /home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.4.tritongpu-global-scratch-memory-allocation.llir.mlir
+===> Applying Pass: convert-triton-gpu-to-llvm{compute-capability=86 ptx-version=84}
+Output File: /home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.5.convert-triton-gpu-to-llvm.llir.mlir
+===> Applying Pass: convert-nv-gpu-to-llvm
+Output File: /home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.6.convert-nv-gpu-to-llvm.llir.mlir
+===> Applying Pass: convert-arith-to-llvm
+Output File: /home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.7.convert-arith-to-llvm.llir.mlir
+===> Applying Pass: canonicalize
+Output File: /home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.8.canonicalize.llir.mlir
+===> Applying Pass: cse
+Output File: /home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.9.cse.llir.mlir
+===> Applying Pass: symbol-dce
+Output File: /home/chan/triton/liquid-kernel/compiled/matmul_kernel.ttgir.10.symbol-dce.llir.mlir
