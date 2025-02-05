@@ -277,10 +277,7 @@ def compile(src, target=None, options=None):
     # except Exception as e:
     #     filter_traceback(e)
     #     raise
-<<<<<<< HEAD
-=======
     # import ipdb; ipdb.set_trace()
->>>>>>> chan
     use_ir_loc = os.environ.get("USE_IR_LOC", None)
     for ext, compile_ir in list(stages.items())[first_stage:]:
         next_module = compile_ir(module, metadata)
